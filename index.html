@@ -1,0 +1,54 @@
+<!-- BOT DURUMU KISMI -->
+<div id="botStatus" style="
+  margin-top: 30px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-family: sans-serif;
+  max-width: 400px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+">
+  <h3>🤖 Bot Durumu</h3>
+  <p id="statusText">Yükleniyor...</p>
+  <p id="apiPing">API Ping: -</p>
+  <p id="gatewayPing">Gateway Ping: -</p>
+  <p id="messagePing">Message Ping: -</p>
+</div>
+
+<script>
+async function updateBotStatus() {
+  const statusText = document.getElementById("statusText");
+  const apiPingEl = document.getElementById("apiPing");
+  const gatewayPingEl = document.getElementById("gatewayPing");
+  const messagePingEl = document.getElementById("messagePing");
+
+  try {
+    const res = await fetch("https://botpingdel.vercel.app/api/ping");
+    const data = await res.json();
+
+    if (data.success) {
+      statusText.innerHTML = "🟢 Aktif";
+      apiPingEl.innerHTML = `API Ping: ${data.apiPing}`;
+      gatewayPingEl.innerHTML = `Gateway Ping: ${data.gatewayPing}`;
+      messagePingEl.innerHTML = `Message Ping: ${data.messagePing}`;
+    } else {
+      statusText.innerHTML = "🔴 Kapalı";
+    }
+  } catch (err) {
+    statusText.innerHTML = "🔴 Kapalı";
+    apiPingEl.innerHTML = "API Ping: -";
+    gatewayPingEl.innerHTML = "Gateway Ping: -";
+    messagePingEl.innerHTML = "Message Ping: -";
+  }
+}
+
+// İlk başta çağır
+updateBotStatus();
+
+// 10 saniyede bir yenile
+setInterval(updateBotStatus, 10000);
+</script>
