@@ -1,54 +1,88 @@
-<!-- BOT DURUMU KISMI -->
-<div id="botStatus" style="
-  margin-top: 30px;
-  padding: 15px;
-  border-radius: 10px;
-  background: #1e293b;
-  color: #e2e8f0;
-  font-family: sans-serif;
-  max-width: 400px;
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-">
-  <h3>🤖 Bot Durumu</h3>
-  <p id="statusText">Yükleniyor...</p>
-  <p id="apiPing">API Ping: -</p>
-  <p id="gatewayPing">Gateway Ping: -</p>
-  <p id="messagePing">Message Ping: -</p>
-</div>
-
-<script>
-async function updateBotStatus() {
-  const statusText = document.getElementById("statusText");
-  const apiPingEl = document.getElementById("apiPing");
-  const gatewayPingEl = document.getElementById("gatewayPing");
-  const messagePingEl = document.getElementById("messagePing");
-
-  try {
-    const res = await fetch("https://botpingdel.vercel.app/api/ping");
-    const data = await res.json();
-
-    if (data.success) {
-      statusText.innerHTML = "🟢 Aktif";
-      apiPingEl.innerHTML = `API Ping: ${data.apiPing}`;
-      gatewayPingEl.innerHTML = `Gateway Ping: ${data.gatewayPing}`;
-      messagePingEl.innerHTML = `Message Ping: ${data.messagePing}`;
-    } else {
-      statusText.innerHTML = "🔴 Kapalı";
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discord Bot Ping Panel</title>
+  <style>
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
-  } catch (err) {
-    statusText.innerHTML = "🔴 Kapalı";
-    apiPingEl.innerHTML = "API Ping: -";
-    gatewayPingEl.innerHTML = "Gateway Ping: -";
-    messagePingEl.innerHTML = "Message Ping: -";
-  }
-}
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .ping-box {
+      background: #161b22;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 300px;
+    }
+    pre {
+      text-align: left;
+      background: #0d1117;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      overflow-x: auto;
+    }
+    .refresh {
+      color: #8b949e;
+      font-size: 0.8rem;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Discord Bot Ping Panel</h1>
+  <div class="ping-box">
+    <pre id="result">Yükleniyor...</pre>
+    <p class="refresh" id="timer">Yenileme: 30s</p>
+  </div>
 
-// İlk başta çağır
-updateBotStatus();
+  <script>
+    const API_URL = "https://botpingdel.vercel.app/api/ping";
+    const CHANNEL_ID = "1436148492480413747";
+    const resultBox = document.getElementById("result");
+    const timerBox = document.getElementById("timer");
 
-// 10 saniyede bir yenile
-setInterval(updateBotStatus, 10000);
-</script>
+    async function fetchPing() {
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ channel_id: CHANNEL_ID })
+        });
+        const data = await res.json();
+        resultBox.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultBox.textContent = "Hata: " + err.message;
+      }
+    }
+
+    // Otomatik 30 saniyede bir yenile
+    let counter = 30;
+    setInterval(() => {
+      counter--;
+      if (counter <= 0) {
+        counter = 30;
+        fetchPing();
+      }
+      timerBox.textContent = `Yenileme: ${counter}s`;
+    }, 1000);
+
+    // İlk yüklemede hemen çek
+    fetchPing();
+  </script>
+</body>
+</html>
